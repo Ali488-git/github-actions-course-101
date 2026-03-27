@@ -23,7 +23,7 @@ jobs:
 
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v3
-        with:                             # ✅ FIX: missing "with"
+        with:                            
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Set up dependency caching for faster builds
@@ -46,24 +46,28 @@ jobs:
           name: dotnet-app                     # ✅ avoid dot in name
           path: ./publish
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
+deploy:
+  runs-on: ubuntu-latest
+  needs: build
 
-    environment:
-      name: Development
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+  environment:
+    name: Development
+    url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v4
-        with:
-          name: dotnet-app
+  steps:
+    - name: Download artifact from build job
+      uses: actions/download-artifact@v4
+      with:
+        name: dotnet-app
+        path: ./app              # ✅ FIX: explicit download location
 
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .
+    - name: Verify downloaded files (debug)
+      run: ls -R ./app          # ✅ helps confirm files exist
+
+    - name: Deploy to Azure Web App
+      id: deploy-to-webapp
+      uses: azure/webapps-deploy@v3
+      with:
+        app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+        package: ./app          # ✅ FIX: point to downloaded artifact
