@@ -41,8 +41,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up .NET Core
-        uses:actions/setup-dotnet@v3 
-        with:
+        uses:  actions/setup-dotnet@v3 
           dotnet-version: ${{ env.DOTNET_VERSION }}
       
       - name: Set up dependency caching for faster builds
